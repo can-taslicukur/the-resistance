@@ -1,7 +1,7 @@
 box::use(
   shiny[
     NS, tagList, tags, moduleServer, textOutput, renderText, invalidateLater, reactive,
-    reactiveVal, observe, observeEvent, uiOutput, renderUI, req, HTML
+    reactiveVal, observe, observeEvent, uiOutput, renderUI, req, HTML, isolate
   ],
   shinyMobile[f7Button, f7Popup]
 )
@@ -30,14 +30,14 @@ affiliationsServer <- function(id, players, player_factions, gameState, reveal_d
       #Only set it when user gets to the affiliations page or player changes
       observe({
         if (gameState()=="affiliations" | current_player()>1) {
-          timerReference(Sys.time() + reveal_duration)
+          timerReference(Sys.time() + isolate(reveal_duration))
         }
       })
       output$revealFaction <- renderUI({
         req(timerReference())
         #Start the countdown
         timeLeft <- round(difftime(timerReference(), Sys.time(), units = "secs"))
-        if (timeLeft>=0 & timeLeft <= reveal_duration) {
+        if (timeLeft>=0 & timeLeft <= isolate(reveal_duration)) {
           invalidateLater(1000, session)
           tags$h4(timeLeft, align = "center")
         } else { #When countdown is over, render a button to reveal faction

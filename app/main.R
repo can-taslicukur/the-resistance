@@ -1,8 +1,9 @@
 box::use(
-  shiny[moduleServer, NS, tags, reactiveVal, observe, icon, verbatimTextOutput, renderPrint],
+  shiny[moduleServer, NS, tags, reactiveVal, observe, icon, verbatimTextOutput, 
+        renderPrint],
   shinyMobile[
-    f7Page, f7TabLayout, f7Navbar, f7Toolbar, f7Tabs, f7Tab, updateF7Tabs, f7Link
-  ]
+    f7Page, f7TabLayout, f7Navbar, f7Toolbar, f7Tabs, f7Tab, updateF7Tabs, f7Link, 
+    f7Stepper]
 )
 
 box::use(
@@ -24,9 +25,14 @@ ui <- function(id) {
         f7Tab(
           tags$header(
             tags$h1("Welcome to The Resistance", align = "center"),
-            tags$p("Enter players to start the game.")
+            tags$p("Enter players to start the game."),
+            tags$h2("Game Options:"),
+            f7Stepper(inputId = ns("factionRevealDuration"),
+                      label = "Faction Reveal Duration",min = 0,max = 15,value = 5,
+                      fill = FALSE)
           ),
           tags$main(
+            tags$br(),
             enterPlayers$enterPlayersUI(ns("enterPlayers")),
             startGame$startGameUI(ns("startGame"))
           ),
@@ -67,7 +73,7 @@ server <- function(id) {
     players <- enterPlayers$enterPlayersServer("enterPlayers")
     startGame$startGameServer("startGame", players, gameState)
     player_factions <- affiliationsReady$affiliationsReadyServer("affiliationsReady", players, gameState)
-    affiliations$affiliationsServer("affiliations", players, player_factions, gameState, 3)
+    affiliations$affiliationsServer("affiliations", players, player_factions, gameState, input$factionRevealDuration)
     output$CurrentPlayers <- renderPrint(players())
     output$CurrentFactions <- renderPrint(player_factions())
   })
