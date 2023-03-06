@@ -10,7 +10,8 @@ box::use(
   app/view/enterPlayers,
   app/view/startGame,
   app/view/affiliationsReady,
-  app/view/affiliations
+  app/view/affiliations,
+  app/view/roundsReady
 )
 
 #' @export
@@ -50,6 +51,7 @@ ui <- function(id) {
           tabName = "affiliations",hidden = TRUE
         ),
         f7Tab(
+          roundsReady$roundsReadyUI(ns("roundsReady")),
           verbatimTextOutput(outputId = ns("CurrentPlayers")),
           verbatimTextOutput(outputId = ns("CurrentFactions")),
           title = "Rounds Prepare",
@@ -74,6 +76,7 @@ server <- function(id) {
     startGame$startGameServer("startGame", players, gameState)
     player_factions <- affiliationsReady$affiliationsReadyServer("affiliationsReady", players, gameState)
     affiliations$affiliationsServer("affiliations", players, player_factions, gameState, input$factionRevealDuration)
+    round_sizes <- roundsReady$roundsReadyServer("roundsReady", players, gameState)
     output$CurrentPlayers <- renderPrint(players())
     output$CurrentFactions <- renderPrint(player_factions())
   })
