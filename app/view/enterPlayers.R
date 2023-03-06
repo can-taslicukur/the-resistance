@@ -8,7 +8,7 @@ enterPlayersUI <- function(id) {
   ns <- NS(id)
   tagList(
     f7Stepper(inputId = ns("playerCount"),
-              label = "How many players?",
+              label = "Number of players",
               min = 5,max = 10,value = 5,
               step = 1),
     uiOutput(outputId = ns("playerNames"))
@@ -44,6 +44,6 @@ enterPlayersServer <- function(id) {
         player_name_inputs
       })
       
-      players <- reactive({sapply(input_ids(),function(x) ifelse(is.null(input[[x]]),"",input[[x]]))})
+      reactive({sapply(input_ids(),function(x) ifelse(is.null(input[[x]]),"",input[[x]]))})
     })
 }
