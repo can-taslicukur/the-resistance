@@ -4,10 +4,6 @@ box::use(
   shinyMobile[f7Button]
 )
 
-box::use(
-  app/logic/calculate_round_team_size
-)
-
 roundsReadyUI <- function(id) {
   ns <- NS(id)
   tagList(
@@ -26,21 +22,10 @@ roundsReadyUI <- function(id) {
   )
 }
 
-roundsReadyServer <- function(id, players, gameState) {
+roundsReadyServer <- function(id, players, round_sizes, gameState) {
   moduleServer(
     id,
     function(input, output, session) {
-      
-      round_sizes <- reactive({
-        if (gameState() == "roundsReady") {
-          number_of_players <- length(players())
-          if (number_of_players >= 5 & number_of_players <= 10) {
-            print(calculate_round_team_size$calculate_round_team_size(number_of_players))
-            calculate_round_team_size$calculate_round_team_size(number_of_players)
-          }
-        }
-      })
-      
       output$firstRoundSize <- renderText(round_sizes()[1])
       output$secondRoundSize <- renderText(round_sizes()[2])
       output$thirdRoundSize <- renderText(round_sizes()[3])
@@ -48,8 +33,6 @@ roundsReadyServer <- function(id, players, gameState) {
       output$fifthRoundSize <- renderText(round_sizes()[5])
       
       observeEvent(input$startRounds,gameState("leadersChoice"))
-      
-      round_sizes
     }
   )
 }

@@ -1,6 +1,6 @@
 box::use(
   shiny[moduleServer, NS, tags, reactiveVal, observe, icon, verbatimTextOutput, 
-        renderPrint],
+        renderPrint, reactive],
   shinyMobile[
     f7Page, f7TabLayout, f7Navbar, f7Toolbar, f7Tabs, f7Tab, updateF7Tabs, f7Link, 
     f7Stepper]
@@ -11,7 +11,9 @@ box::use(
   app/view/startGame,
   app/view/affiliationsReady,
   app/view/affiliations,
-  app/view/roundsReady
+  app/view/roundsReady,
+  app/view/leadersChoice,
+  app/logic/calculate_round_team_size
 )
 
 #' @export
@@ -52,10 +54,16 @@ ui <- function(id) {
         ),
         f7Tab(
           roundsReady$roundsReadyUI(ns("roundsReady")),
-          verbatimTextOutput(outputId = ns("CurrentPlayers")),
-          verbatimTextOutput(outputId = ns("CurrentFactions")),
+          verbatimTextOutput(ns("currentPlayers")),
+          verbatimTextOutput(ns("currentFactions")),
+          verbatimTextOutput(ns("currentLeader")),
           title = "Rounds Prepare",
           tabName = "roundsReady",hidden = TRUE
+        ),
+        f7Tab(
+          title = "Leader Chooses The Team",
+          leadersChoice$leadersChoiceUI(ns("leadersChoice")),
+          tabName = "leadersChoice",hidden = TRUE
         )
       )
     ),
@@ -75,9 +83,12 @@ server <- function(id) {
     players <- enterPlayers$enterPlayersServer("enterPlayers")
     startGame$startGameServer("startGame", players, gameState)
     player_factions <- affiliationsReady$affiliationsReadyServer("affiliationsReady", players, gameState)
-    affiliations$affiliationsServer("affiliations", players, player_factions, gameState, input$factionRevealDuration)
-    round_sizes <- roundsReady$roundsReadyServer("roundsReady", players, gameState)
-    output$CurrentPlayers <- renderPrint(players())
-    output$CurrentFactions <- renderPrint(player_factions())
+    affiliations$affiliationsServer("affiliations", players, player_factions, gameState, 
+                                    input$factionRevealDuration)
+    round_sizes <- reactive(calculate_round_team_size$calculate_round_team_size(length(players())))
+    roundsReady$roundsReadyServer("roundsReady", players, round_sizes, gameState)
+    round <- reactiveVal(value = 1, label = "round")
+    spy_win_count <- reactiveVal(value = 0, label = "spy_win_count")
+    leadersChoice$leadersChoiceServer("leadersChoice", players, round_sizes, round, spy_win_count, gameState)
   })
 }
