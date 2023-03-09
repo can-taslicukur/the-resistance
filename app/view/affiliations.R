@@ -11,6 +11,9 @@ affiliationsUI <- function(id) {
   tagList(
     tags$h5("Pass the phone to:",align = "center"),
     tags$h1(tags$span(textOutput(outputId = ns("player"))), align = "center"),
+    tags$p(tags$img(src = "static/phone-with-right-arrow.png", alt = "Phone icons created by Freepik",
+                    width = 128, height = 128),
+           align = "center"),
     uiOutput(outputId = ns("revealFaction"))
   )
 }
